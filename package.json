@@ -1,0 +1,20 @@
+{
+  "name": "tetrissone",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "A tile-laying game that mashes up Carcassonne feature-matching with Tetris polyomino tiles.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.0.0"
+  }
+}
