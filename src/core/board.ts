@@ -1,5 +1,5 @@
-import { cellKey } from './tile'
-import type { PlacedCell } from './tile'
+import { cellKey, sideDelta, SIDES } from './tile'
+import type { EdgeSide, PlacedCell } from './tile'
 
 export interface Board {
   cells: Map<string, PlacedCell>
@@ -12,16 +12,15 @@ export function createBoard(): Board {
 interface Neighbor {
   dx: number
   dy: number
-  myEdge: 'n' | 'e' | 's' | 'w'
-  theirEdge: 'n' | 'e' | 's' | 'w'
+  myEdge: EdgeSide
+  theirEdge: EdgeSide
 }
 
-const NEIGHBORS: Neighbor[] = [
-  { dx: 0, dy: -1, myEdge: 'n', theirEdge: 's' },
-  { dx: 1, dy: 0, myEdge: 'e', theirEdge: 'w' },
-  { dx: 0, dy: 1, myEdge: 's', theirEdge: 'n' },
-  { dx: -1, dy: 0, myEdge: 'w', theirEdge: 'e' },
-]
+const NEIGHBORS: Neighbor[] = SIDES.map((s) => {
+  const { dx, dy } = sideDelta(s)
+  const opp: EdgeSide = s === 'n' ? 's' : s === 's' ? 'n' : s === 'e' ? 'w' : 'e'
+  return { dx, dy, myEdge: s, theirEdge: opp }
+})
 
 export interface PlacementResult {
   ok: boolean
@@ -68,10 +67,14 @@ export function place(
   cells: PlacedCell[],
   ax: number,
   ay: number,
-): void {
+): PlacedCell[] {
+  const out: PlacedCell[] = []
   for (const c of cells) {
     const gx = ax + c.x
     const gy = ay + c.y
-    board.cells.set(cellKey(gx, gy), { ...c, x: gx, y: gy })
+    const placed: PlacedCell = { ...c, x: gx, y: gy }
+    board.cells.set(cellKey(gx, gy), placed)
+    out.push(placed)
   }
+  return out
 }

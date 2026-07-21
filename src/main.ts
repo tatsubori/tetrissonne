@@ -1,8 +1,10 @@
-import { newGame, rotate, tryPlace, upcoming } from './core/game'
+import { newGame, rotate, tryPlace, tryPlaceMeeple, skipMeeple, upcoming } from './core/game'
+import type { Anchor, FeatureKind } from './core/game'
 import { drawBoard } from './render/board'
 import { drawHUD } from './render/hud'
 import { screenToCell } from './render/grid'
 import type { Camera } from './render/grid'
+import type { EdgeSide } from './core/tile'
 import { CELL_SIZE, HUD_WIDTH } from './render/theme'
 
 const canvas = document.getElementById('game') as HTMLCanvasElement | null
@@ -67,14 +69,36 @@ canvas.addEventListener('mouseleave', () => {
   }
 })
 
+// Which feature of a placed cell a click lands on: the central square selects a
+// monastery; otherwise the four diagonal quadrants map to the N/E/S/W edge.
+function pickFeatureAt(gx: number, gy: number, sx: number, sy: number): Anchor | null {
+  const cell = game.board.cells.get(`${gx},${gy}`)
+  if (!cell) return null
+  const size = cam.cellSize
+  const dx = sx - (cam.originX + gx * size) - size / 2
+  const dy = sy - (cam.originY + gy * size) - size / 2
+  if (cell.center === 'monastery' && Math.hypot(dx, dy) < size * 0.22) {
+    return { x: gx, y: gy, feature: 'monastery' }
+  }
+  let side: EdgeSide
+  if (dy < 0 && Math.abs(dx) <= -dy) side = 'n'
+  else if (dy > 0 && Math.abs(dx) <= dy) side = 's'
+  else if (dx > 0) side = 'e'
+  else side = 'w'
+  return { x: gx, y: gy, feature: cell.edges[side] as FeatureKind, side }
+}
+
 canvas.addEventListener('click', (e) => {
   const rect = canvas!.getBoundingClientRect()
   const sx = e.clientX - rect.left
   const sy = e.clientY - rect.top
   if (sx > window.innerWidth - HUD_WIDTH) return
   const target = screenToCell(cam, sx, sy)
-  if (tryPlace(game, target.gx, target.gy)) {
-    dirty = true
+  if (game.phase === 'place-tile') {
+    if (tryPlace(game, target.gx, target.gy)) dirty = true
+  } else if (game.phase === 'place-meeple') {
+    const anchor = pickFeatureAt(target.gx, target.gy, sx, sy)
+    if (anchor && tryPlaceMeeple(game, anchor)) dirty = true
   }
 })
 
@@ -85,7 +109,13 @@ canvas.addEventListener('contextmenu', (e) => {
 })
 
 window.addEventListener('keydown', (e) => {
-  if (e.key === 'r' || e.key === 'R') {
+  if (e.key === ' ') {
+    e.preventDefault()
+    if (game.phase === 'place-meeple') {
+      skipMeeple(game)
+      dirty = true
+    }
+  } else if (e.key === 'r' || e.key === 'R') {
     rotate(game, e.shiftKey ? -1 : 1)
     dirty = true
   } else if (e.key === 'q' || e.key === 'Q') {

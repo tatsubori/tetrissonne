@@ -1,5 +1,22 @@
 export type Edge = 'road' | 'city' | 'field'
 export type CenterFeature = Edge | 'monastery'
+export type EdgeSide = 'n' | 'e' | 's' | 'w'
+
+export const SIDES: EdgeSide[] = ['n', 'e', 's', 'w']
+
+export function oppositeSide(s: EdgeSide): EdgeSide {
+  if (s === 'n') return 's'
+  if (s === 's') return 'n'
+  if (s === 'e') return 'w'
+  return 'e'
+}
+
+export function sideDelta(s: EdgeSide): { dx: number; dy: number } {
+  if (s === 'n') return { dx: 0, dy: -1 }
+  if (s === 'e') return { dx: 1, dy: 0 }
+  if (s === 's') return { dx: 0, dy: 1 }
+  return { dx: -1, dy: 0 }
+}
 
 export interface CellSpec {
   x: number
