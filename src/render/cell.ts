@@ -1,5 +1,30 @@
 import { THEME } from './theme'
+import { isRoadVillage } from '../core/features'
 import type { Edge, PlacedCell } from '../core/tile'
+
+// A small house marking a road junction's village: the terminator that ends the
+// roads meeting here. Purely a marker — not a claimable feature.
+function drawVillage(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number): void {
+  const w = size * 0.34
+  const h = size * 0.24
+  const bodyTop = cy - h * 0.08
+  const left = cx - w / 2
+
+  ctx.fillStyle = THEME.villageWall
+  ctx.strokeStyle = THEME.villageEdge
+  ctx.lineWidth = 1.5
+  ctx.fillRect(left, bodyTop, w, h)
+  ctx.strokeRect(left, bodyTop, w, h)
+
+  ctx.beginPath()
+  ctx.moveTo(left - w * 0.12, bodyTop)
+  ctx.lineTo(cx, bodyTop - h * 0.62)
+  ctx.lineTo(left + w + w * 0.12, bodyTop)
+  ctx.closePath()
+  ctx.fillStyle = THEME.villageRoof
+  ctx.fill()
+  ctx.stroke()
+}
 
 function edgeFill(edge: Edge): string {
   if (edge === 'road') return THEME.road
@@ -84,6 +109,10 @@ export function drawCell(
       ctx.lineTo(x2, y2)
       ctx.stroke()
     }
+  }
+
+  if (isRoadVillage(cell)) {
+    drawVillage(ctx, cx, cy, size)
   }
 
   if (cell.center === 'monastery') {

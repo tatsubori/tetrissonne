@@ -16,23 +16,40 @@ const straightRoad: TileSpec = { id: 'sr', cells: [{ x: 0, y: 0, center: F, edge
 const closedCity: TileSpec = { id: 'cc', cells: [{ x: 0, y: 0, center: C, edges: [C, C, C, C] }] }
 const citySide: TileSpec = { id: 'cs', cells: [{ x: 0, y: 0, center: C, edges: [C, F, F, F] }] }
 const monastery: TileSpec = { id: 'mon', cells: [{ x: 0, y: 0, center: 'monastery', edges: [F, F, F, F] }] }
-const cross: TileSpec = { id: 'x', cells: [{ x: 0, y: 0, center: F, edges: [R, R, R, R] }] }
+const tRoad: TileSpec = { id: 't', cells: [{ x: 0, y: 0, center: F, edges: [R, R, R, F] }] } // N,E,S
+// A church with roads on N and S: the church terminates the roads meeting it.
+const churchThrough: TileSpec = { id: 'ct', cells: [{ x: 0, y: 0, center: 'monastery', edges: [R, F, R, F] }] }
+// A church that caps one road end (road on S at rot 0).
+const churchCap: TileSpec = { id: 'cap', cells: [{ x: 0, y: 0, center: 'monastery', edges: [F, F, R, F] }] }
 
 describe('road segments', () => {
-  it('joins a straight road across two stacked tiles and detects completion', () => {
+  it('a village junction (3+ roads) terminates the roads — each arm is its own road', () => {
+    const board = createBoard()
+    put(board, tRoad, 0, 0) // N, E, S
+    const roads = computeSegments(board).list.filter((s) => s.kind === 'road')
+    expect(roads.length).toBe(3)
+  })
+
+  it('a church terminates the roads meeting it (splits them)', () => {
+    const board = createBoard()
+    put(board, churchThrough, 0, 0)
+    const roads = computeSegments(board).list.filter((s) => s.kind === 'road')
+    expect(roads.length).toBe(2)
+  })
+
+  it('a road capped at both ends by churches is complete and scores per tile', () => {
     const board = createBoard()
     put(board, straightRoad, 0, 0)
     put(board, straightRoad, 0, 1)
-    const road = computeSegments(board).list.find((s) => s.kind === 'road')!
-    expect(road.cells.size).toBe(2)
-    expect(road.complete).toBe(false)
+    const open = computeSegments(board).list.find((s) => s.kind === 'road')!
+    expect(open.cells.size).toBe(2)
+    expect(open.complete).toBe(false)
 
-    // Terminal junction tiles are part of the road, so it now spans 4 cells.
-    put(board, cross, 0, -1)
-    put(board, cross, 0, 2)
-    const road2 = computeSegments(board).list.find((s) => s.kind === 'road' && s.complete)!
-    expect(road2.cells.size).toBe(4)
-    expect(completedScore(road2)).toBe(4)
+    put(board, churchCap, 0, -1) // church above, road on S caps the top
+    put(board, churchCap, 0, 2, 2) // church below (rot 180 -> road on N), caps the bottom
+    const road = computeSegments(board).list.find((s) => s.kind === 'road' && s.complete)!
+    expect(road.cells.size).toBe(4)
+    expect(completedScore(road)).toBe(4)
   })
 })
 

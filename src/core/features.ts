@@ -5,13 +5,28 @@ export function edgesOf(cell: PlacedCell, kind: Edge): EdgeSide[] {
   return SIDES.filter((s) => cell.edges[s] === kind)
 }
 
-// How the road stubs on a single cell are joined internally.
-// 2 stubs form one through-group (straight/curve). Otherwise each stub is
-// its own group (solo dead-end for 1 stub; a hub/village for 3-4 stubs).
+// How the road stubs on a single cell are joined internally. A straight/curve
+// (2 stubs) flows through as one road. A road terminator on the cell ends every
+// road meeting there, making each stub its own road: that's a church (monastery)
+// or the village that sits at a 3-/4-way junction. This applies to both
+// placement and scoring.
 export function roadGroups(cell: PlacedCell): EdgeSide[][] {
   const stubs = edgesOf(cell, 'road')
-  if (stubs.length === 2) return [stubs]
-  return stubs.map((s) => [s])
+  if (stubs.length === 0) return []
+  if (isRoadSeparator(cell)) return stubs.map((s) => [s])
+  return [stubs]
+}
+
+// A junction (3+ roads meeting) carries a village that terminates those roads.
+// It is a terminator only — not a feature a meeple can occupy.
+export function isRoadVillage(cell: PlacedCell): boolean {
+  return cell.center !== 'monastery' && edgesOf(cell, 'road').length >= 3
+}
+
+// A cell feature that ends the roads passing through it: a church (monastery) or
+// a village junction.
+function isRoadSeparator(cell: PlacedCell): boolean {
+  return cell.center === 'monastery' || isRoadVillage(cell)
 }
 
 // All city edges on a cell belong to one segment. This is a simplification

@@ -15,6 +15,9 @@ export const THEME = {
   city: '#5a4a3a',
   cityWall: '#3a2f24',
   monastery: '#e6c34a',
+  villageWall: '#d9cdb4',
+  villageRoof: '#a6473a',
+  villageEdge: '#4a3b30',
 
   ghostValid: 'rgba(120, 200, 140, 0.85)',
   ghostInvalid: 'rgba(220, 90, 90, 0.85)',
