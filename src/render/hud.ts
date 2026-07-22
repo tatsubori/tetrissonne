@@ -85,7 +85,7 @@ export function drawHUD(
   ctx.textAlign = 'left'
   ctx.fillStyle = THEME.text
   ctx.font = '700 22px system-ui, sans-serif'
-  ctx.fillText('Tetrissone', x + 20, 40)
+  ctx.fillText('Tetrissonne', x + 20, 40)
 
   ctx.fillStyle = THEME.textDim
   ctx.font = '12px system-ui, sans-serif'

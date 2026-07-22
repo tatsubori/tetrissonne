@@ -1,8 +1,8 @@
-# Tetrissone
+# Tetrissonne
 
 A tile-laying game that mashes up **Carcassonne**'s feature-matching board with **Tetris**'s falling-shape twist. Land polyomino tiles onto the growing map so that roads, cities, and fields line up — and clear pressure by completing features before the queue overflows.
 
-![Tetrissone gameplay — a completed board of roads, cities, and monasteries laid out from Carcassonne singles and Tetris-shaped polyominoes.](docs/images/gameplay.png)
+![Tetrissonne gameplay — a completed board of roads, cities, and monasteries laid out from Carcassonne singles and Tetris-shaped polyominoes.](docs/images/gameplay.png)
 
 ## Status
 

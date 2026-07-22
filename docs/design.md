@@ -1,4 +1,4 @@
-# Tetrissone — Design Sketch
+# Tetrissonne — Design Sketch
 
 This is a working sketch, not a spec. Everything here is up for debate.
 
